@@ -1,26 +1,27 @@
 cmake_minimum_required(VERSION 3.21)
-project(DataVisGL CXX C)
+project(RenderFun CXX C)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_STANDARD 14)
-include(cmake/conan.cmake)
+# Find and install using vcpkg
+find_package(SDL2 CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(Vulkan REQUIRED)
 
-conan_cmake_configure(REQUIRES
-        fmt/8.1.1
-        glad/0.1.34
-        glm/0.9.9.8
-        GENERATORS cmake_find_package)
+add_executable(RenderFUN code/main.cpp
+        code/vlk/RenderVK.cpp
+        code/vlk/RenderVK.h
+        code/vlk/Instance.cpp
+        code/vlk/Instance.h
+        code/ogl/RenderGL.cpp
+        code/ogl/RenderGL.h)
 
-conan_cmake_install(PATH_OR_REFERENCE .
-        BUILD missing)
-
-find_package(SDL2 REQUIRED)
-find_package(fmt)
-find_package(glad)
-find_package(glm)
-
-add_executable(DataVisGL main.cpp)
-
-target_link_libraries(DataVisGL SDL2::SDL2 fmt::fmt glad::glad glm::glm)
+target_link_libraries(RenderFUN
+        PRIVATE SDL2::SDL2
+        PRIVATE fmt::fmt
+        PRIVATE glad::glad
+        PRIVATE glm::glm
+        PRIVATE Vulkan::Vulkan)

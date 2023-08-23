@@ -7,6 +7,9 @@ static GLuint vao;
 static GLuint shaderProgram;
 static const GLuint g_windowWidth = 1280, g_windowHeight = 720;
 
+/**
+ *
+ */
 static void prepareBuffers() {
     const GLfloat vertices[2][9] = {{0.4f, -0.8f, 0.0f, -0.8f, -0.8f, 0.0f, -0.8f, 0.8f, 0.0f},
                                     {0.8f, 0.8f, 0.0f, -0.4f, 0.8f, 0.0f, 0.8f, -0.8f, 0.0f}};
@@ -64,7 +67,7 @@ static void prepareShaders() {
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, nullptr, &infoLog[0]);
-        fmt::printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n %s", infoLog);
+        fmt::printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED {}\n", infoLog);
     }
 
     shaderProgram = glCreateProgram();
@@ -82,77 +85,17 @@ static void prepareShaders() {
 }
 
 int main() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Unable to initialize SDL: %s", SDL_GetError());
-        return -1;
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-
-    fmt::printf("SDL_GetCurrentVideoDriver(): %s\n", SDL_GetCurrentVideoDriver());
-
-    SDL_Window *window = SDL_CreateWindow("The triangle tale", 0, 0, g_windowWidth, g_windowHeight,
-                                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-    if (window == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Could not create window: %s", SDL_GetError());
-        return -1;
-    }
-
-    SDL_GLContext context = SDL_GL_CreateContext(window);
-    if (context == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Could not create OpenGL context: %s", SDL_GetError());
-        return -1;
-    }
-
-    gladLoadGLLoader(SDL_GL_GetProcAddress);
-    fmt::printf("Vendor:   %s\n", glGetString(GL_VENDOR));
-    fmt::printf("Renderer: %s\n", glGetString(GL_RENDERER));
-    fmt::printf("Version:  %s\n", glGetString(GL_VERSION));
 
     prepareBuffers();
     prepareShaders();
 
     glViewport(0, 0, g_windowWidth, g_windowHeight);
 
-    SDL_Event event;
-    while (true) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(shaderProgram);
-
-        glBindVertexArray(vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        SDL_GL_SwapWindow(window);
-
-        SDL_PollEvent(&event);
-        if (event.type == SDL_QUIT)
-            break;
-    }
-
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(2, vbo);
     glDeleteProgram(shaderProgram);
 
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+
 
     return 0;
 }
